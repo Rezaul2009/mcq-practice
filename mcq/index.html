@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCQ Practice</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"Poppins",Arial,sans-serif;
+    background:linear-gradient(135deg,#232526,#414345);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.exam-wrapper{
+    width:100%;
+    max-width:430px;
+    padding:15px;
+}
+
+.title{
+    text-align:center;
+    color:#fff;
+    font-size:28px;
+    font-weight:900;
+    margin-bottom:15px;
+}
+
+.mcq-card{
+    background:#fff;
+    border-radius:22px;
+    padding:25px;
+    box-shadow:0 15px 40px rgba(0,0,0,.3);
+}
+
+.counter{
+    text-align:center;
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:18px;
+}
+
+.option{
+    border:2px solid #ddd;
+    border-radius:40px;
+    padding:14px;
+    margin:10px 0;
+    text-align:center;
+    font-size:16px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option.active{
+    background:#ff9800;
+    border-color:#ff9800;
+    color:#fff;
+    font-weight:700;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:12px;
+    font-size:15px;
+    font-weight:800;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+}
+
+.finish{background:#000;color:#fff;}
+.new{background:#e53935;color:#fff;}
+
+.result-box{
+    background:#fff;
+    margin-top:18px;
+    padding:15px;
+    border-radius:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+    font-size:14px;
+}
+th{
+    background:#222;
+    color:#fff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="exam-wrapper">
+
+    <div class="title">MCQ Practice</div>
+
+    <div class="mcq-card">
+        <div class="counter" id="counter"></div>
+
+        <div class="option">(ক)</div>
+        <div class="option">(খ)</div>
+        <div class="option">(গ)</div>
+        <div class="option">(ঘ)</div>
+
+        <button class="finish" onclick="finishExam()">Finish Exam</button>
+        <button class="new" onclick="newExam()">New Exam</button>
+    </div>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+let currentQ = parseInt(localStorage.getItem("currentQ")) || 1;
+let answers = JSON.parse(localStorage.getItem("currentExam")) || {};
+
+const counter = document.getElementById("counter");
+const options = document.querySelectorAll(".option");
+const resultDiv = document.getElementById("result");
+
+function loadQuestion(){
+    counter.innerText = `Question ${currentQ} / 50`;
+
+    options.forEach(opt=>{
+        opt.classList.remove("active");
+
+        if(answers[currentQ] === opt.innerText){
+            opt.classList.add("active");
+        }
+
+        opt.onclick = ()=>{
+            answers[currentQ] = opt.innerText;
+            localStorage.setItem("currentExam",JSON.stringify(answers));
+
+            if(currentQ < 50){
+                currentQ++;
+                localStorage.setItem("currentQ",currentQ);
+                loadQuestion();
+            }
+        };
+    });
+}
+
+loadQuestion();
+
+function finishExam(){
+    if(Object.keys(answers).length === 0){
+        alert("কোনো উত্তর নির্বাচন করা হয়নি");
+        return;
+    }
+
+    let html = `
+    <div class="result-box">
+    <b>Your Selected Answers</b>
+    <table>
+        <tr>
+            <th>Question No</th>
+            <th>Your Option</th>
+        </tr>
+    `;
+
+    for(let i=1;i<=50;i++){
+        if(answers[i]){
+            html += `
+            <tr>
+                <td>${i}</td>
+                <td>${answers[i]}</td>
+            </tr>`;
+        }
+    }
+
+    html += `</table></div>`;
+    resultDiv.innerHTML = html;
+}
+
+function newExam(){
+    if(confirm("সব উত্তর ও Result মুছে নতুন Exam শুরু করবেন?")){
+        localStorage.clear();
+        location.reload();
+    }
+}
+</script>
+
+</body>
+</html>
